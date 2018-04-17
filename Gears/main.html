@@ -1,0 +1,280 @@
+<!--
+Description:
+        Program that generates two user defined geometries.
+Authors:
+        Armando Canto Garcia A01322361 Luis Alfredo Leon Villapun A01322275
+Last modification date:
+        19/03/2018
+!-->
+
+<html>
+    <head>
+        <title> My first Three.js app </title>
+        <style>
+            canvas { width: 100%; height: 100% }
+        </style>
+    </head>
+    <body>
+        <script src="threeViejo.min.js"> </script>
+        <script>
+
+
+
+            //Transforms an angle to radian terms
+            function toRadians(angle){
+              return (Math.PI * angle) / 180;
+            }
+
+            //Calculates length of a line
+            function length(p1x, p1y, p2x, p2y){
+              return Math.sqrt(
+                Math.pow(p1x-p2x,2) + Math.pow(p1y-p2y,2)
+              );
+            }
+
+
+
+            window.addEventListener('keydown',doKeyDown,true);
+            var xpos = 0;
+            var zpos = 3.0;
+            function doKeyDown(evt){
+                switch (evt.keyCode) {
+                    case 38:  /* Up arrow was pressed */
+                        zpos -= 5 * Math.PI / 180;
+                        break;
+                    case 40:  /* Down arrow was pressed */
+                        zpos += 5 * Math.PI / 180;
+                        break;
+                    case 37:
+                    camera.rotation.y -= 5 * Math.PI / 180  /* Right arrow was pressed */
+
+                      /* Left arrow was pressed */
+
+                        break;
+                    case 39:
+                    camera.rotation.y += 5 * Math.PI / 180  /* Right arrow was pressed */
+                    break;
+                }
+            }
+            // three basic components of a scene : scene, camera, and render
+            // (lights)
+
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            var renderer = new THREE.WebGLRenderer();
+
+            function calculatePoint(angle, hypotenuse){ //Calculates a point in the gear
+              var angRadians = toRadians(angle);
+              var y = Math.sin(angRadians) * hypotenuse;
+              var x = Math.cos(angRadians) * hypotenuse;
+              var point = [x, y];
+              return point;
+            }
+
+            function generatePoints(smallRadius, bigRadius, numTeeth, z){ //Generates array of points of the gear
+
+              var initialAngle = 0;
+              var angleIncrement = 360 / (numTeeth * 2);
+              var actualAngle = initialAngle;
+              var teeth = true;
+              var pointArray = new Array();
+
+              for(var i = 0; i < numTeeth * 2; i++){
+                if(teeth){ //Calculates first the innermost point
+                  var point = calculatePoint(actualAngle, smallRadius);
+                  var vector = new THREE.Vector3(point[0], point[1], z);
+                  pointArray.push(vector);
+
+                  point = calculatePoint(actualAngle, bigRadius);
+                  vector = new THREE.Vector3(point[0], point[1], z);
+                  pointArray.push(vector);
+
+                  teeth = false;
+                }else{ //Calculates first the outermost point
+                  var point = calculatePoint(actualAngle, bigRadius);
+                  var vector = new THREE.Vector3(point[0], point[1], z);
+                  pointArray.push(vector);
+
+                  point = calculatePoint(actualAngle, smallRadius);
+                  vector = new THREE.Vector3(point[0], point[1], z);
+                  pointArray.push(vector);
+
+                  teeth = true;
+                }
+                actualAngle += angleIncrement;
+              }
+
+              return pointArray;
+            }
+
+            function makeFace(v1, v2, v3){
+              return new THREE.Face3(v1,v2,v3);
+            }
+
+            function constructTeethFaces(vectors, middle){
+              var faces = new Array();
+              var v1 = 1;
+              var v2 = 0;
+              var v3 = middle;
+
+              for(var i = v1; i < vectors.length / 2; i++){
+                var face = new THREE.Face3(v1,v2,v3);
+                faces.push(face);
+                //console.log(face.a + "," + face.b + "," + face.c);
+                v1++;
+                v2++;
+                v3++;
+              }
+              v1 = 1;
+              v2 = middle;
+              v3 = middle + 1;
+              for(var i = v1; i < vectors.length / 2; i++){
+                if(i == (vectors.length / 2) - 1){
+                  v1 = 0;
+                  v2 = middle-1;
+                  v3 = middle;
+                  var face = new THREE.Face3(v1,v2,v3);
+                  faces.push(face);
+                  //console.log(face.a + "," + face.b + "," + face.c);
+                }
+                else{
+                  var face = new THREE.Face3(v1,v2,v3);
+                  faces.push(face);
+                  //console.log(face.a + "," + face.b + "," + face.c);
+                }
+                v1++;
+                v2++;
+                v3++;
+              }
+
+              return faces;
+            }
+
+            function constructGearFaces(totalVectors, middle){
+              var gearFaces = new Array();
+              var v1 = 1;
+              var v2 = 0;
+              var v3 = 0;
+              for(var i = v1; i < totalVectors.length / 2; i++){
+                var face = new THREE.Face3(v1,v2,v3);
+                gearFaces.push(face);
+                //console.log(face.a + "," + face.b + "," + face.c);
+                v1+=2;
+                v2+=2;
+                v3+=2;
+              }
+
+              v1 = 1;
+              v2 = 0;
+              v3 = 1;
+              for(var i = v1; i < totalVectors.length / 2; i++){
+                var face = new THREE.Face3(v1,v2,v3);
+                gearFaces.push(face);
+                //console.log(face.a + "," + face.b + "," + face.c);
+                v1+=2;
+                v2+=2;
+                v3+=2;
+              }
+
+              return gearFaces;
+            }
+
+            var smallRadInner = 0.5;
+            var bigRadInner = 1;
+            var smallRadOuter = 1.5;
+            var bigRadOuter = 2;
+            var numTeeth = 32;
+            var zTeeth = -1;
+
+            //Generate vectors for inner gear
+            var vectorsInner = generatePoints(smallRadInner, bigRadInner, numTeeth, zTeeth);
+            var middleInnerStart = vectorsInner.length;
+            var vectorsInnerZ_1 = generatePoints(smallRadInner, bigRadInner, numTeeth, zTeeth+1);
+            var vectorsInnerTotal = vectorsInner.concat(vectorsInnerZ_1);
+
+            //Generate vectors for outer gear
+            var vectorsOuter = generatePoints(smallRadOuter, bigRadOuter, numTeeth, zTeeth);
+            var middleOuterStart = vectorsOuter.length;
+            var vectorsOuterZ_1 = generatePoints(smallRadOuter, bigRadOuter, numTeeth, zTeeth +1);
+            var vectorsOuterTotal = vectorsOuter.concat(vectorsOuterZ_1);
+
+            var totalVectors = vectorsInnerTotal.concat(vectorsOuterTotal);
+
+            /*alert("Inner points");
+            for(var i = 0; i < vectorsInnerTotal.length; i++){
+              alert(vectorsInnerTotal[i].x + "," + vectorsInnerTotal[i].y + "," + vectorsInnerTotal[i].z);
+            }
+            alert("Outer points");
+            for(var i = 0; i < vectorsOuterTotal.length; i++){
+              alert(vectorsOuterTotal[i].x + "," + vectorsOuterTotal[i].y + "," + vectorsOuterTotal[i].z);
+            }*/
+
+            //Make the faces of the teeth
+            var facesInner = constructTeethFaces(vectorsInnerTotal, middleInnerStart);
+            var facesOuter = constructTeethFaces(vectorsOuterTotal, middleOuterStart);
+            //Make the remaining faces
+            var bodyFaces = constructGearFaces(totalVectors, totalVectors.length);
+            var gearFaces = facesInner.concat(facesOuter, bodyFaces);
+
+            //Create the geometry
+            var GearGeometry = new THREE.Geometry();
+            GearGeometry.vertices = totalVectors;
+            GearGeometry.faces = gearFaces;
+            GearGeometry.computeBoundingSphere;
+
+            for(var i = 0; i < GearGeometry.faces.length; i++){
+              GearGeometry.faces[i].color.setHex(0x00ffff00);
+            }
+
+            var red = new THREE.MeshBasicMaterial({
+              color: 0xff0000,
+              vertexColors: THREE.FaceColors
+            });
+
+            var blue = new THREE.MeshBasicMaterial({
+              color: 0x00ff00,
+              vertexColors: THREE.FaceColors
+            });
+
+            var redGear = new THREE.Mesh(GearGeometry, red);
+            var blueGear = new THREE.Mesh(GearGeometry, blue);
+
+            blueGear.position.set(0,1.9,0);
+            redGear.position.set(0,0,0);
+            scene.add(blueGear);
+            scene.add(redGear);
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+
+            camera.position.z = zpos;
+            camera.position.x = 0;
+            camera.position.y = 0;
+
+
+
+            // Light
+
+            var pointLight = new THREE.PointLight(0xFFFFFF);
+
+            pointLight.position.x = 10;
+            pointLight.position.y = 50;
+            pointLight.position.z = 130;
+
+            scene.add(pointLight);
+
+            var rotationAngle = 0.05;
+
+            var render = function () {
+                requestAnimationFrame(render);
+                redGear.rotateZ(toRadians(rotationAngle));
+                blueGear.rotateZ(toRadians(rotationAngle));
+                camera.position.z = zpos;
+                renderer.render(scene, camera);
+            };
+            render();
+
+        </script>
+    </body>
+</html>
