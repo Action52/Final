@@ -1,0 +1,198 @@
+<html>
+    <head>
+        <title> Creating groups </title>
+        <style>
+            canvas { width: 100%; height: 100% }
+        </style>
+    </head>
+    <body>
+        <script src="threeViejo.min.js"> </script>
+        <script>
+            //Transforms an angle to radian terms
+            function toRadians(angle){
+              return (Math.PI * angle) / 180;
+            }
+            window.addEventListener('keydown',doKeyDown,true);
+            var cam_zpos = 10.0;
+            var cam_xpos = 0.0;
+            var Pi = 3.14159265358;
+            // x grados a radianes -        x * Pi / 180
+            // x radianes a grados -        x * 180 / Pi
+            var ang_rad = 0;
+
+            function doKeyDown(evt){
+              console.log("Tecla picada: "+evt.keyCode);
+              switch (evt.keyCode) {
+                  case 38:  /* Up arrow was pressed */
+                      var dx = 0.5 * Math.sin(ang_rad);
+                      var dz = 0.5 * Math.cos(ang_rad);
+                      cam_zpos -= dz;
+                      cam_xpos -= dx;
+                      break;
+                  case 40:  /* Down arrow was pressed */
+                      var dx = 0.5 * Math.sin(ang_rad);
+                      var dz = 0.5 * Math.cos(ang_rad);
+                      cam_zpos += dz;
+                      cam_xpos += dx;
+                      break;
+                  case 37:  /* Left arrow was pressed */
+                      ang_rad += (5* Pi / 180);
+                      break;
+                  case 39:  /* Right arrow was pressed */
+                      ang_rad -= (5* Pi / 180);
+                      break;
+
+
+
+                  /* - - - - - - - Controls - - - - - - - */
+                  case 74: /*J pressed  - - - left arm down*/
+                      gbrazoi.rotation.x+=.1;
+                  break;
+                  case 85: /*U pressed  - - - left arm up*/
+                      gbrazoi.rotation.x-=.1;
+                  break;
+                  case 70: /*F pressed  - - - right arm down*/
+                      gbrazod.rotation.x+=.1;
+                  break;
+                  case 82: /*R pressed  - - - right arm up*/
+                      gbrazod.rotation.x-=.1;
+                  break;
+                  case 84: /*T pressed  - - - */
+                      gcabeza.rotation.y-=.1;
+                  break;
+                  case 89: /*Y pressed  - - - */
+                      gcabeza.rotation.y+=.1;
+                  break;
+                  case 71: /*G pressed  - - - */
+                      gtorzo.rotation.y-=.1;
+                  break;
+                  case 72: /*H pressed  - - - */
+                      gtorzo.rotation.y+=.1;
+                  break;
+                  break;
+                  case 73: /*I pressed  - - - */
+                      gpierni.rotation.x-=.1;
+                  break;
+                  case 75: /*K pressed  - - - */
+                      gpierni.rotation.x+=.1;
+                  break;
+                  case 69: /*E pressed  - - - */
+                      gpiernd.rotation.x-=.1;
+                  break;
+                  case 68: /*D pressed  - - - */
+                      gpiernd.rotation.x+=.1;
+                  break;
+
+              }
+            }
+
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.01, 1000);
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            var redMaterial = new THREE.MeshLambertMaterial({
+                color: 0xaaaaaa                             });
+
+
+            //Geometries
+            var baseGeometry = new THREE.CubeGeometry(4, 1, 4);
+            var armGeometry = new THREE.CylinderGeometry(1,1,8,32);
+            var forearmGeometry = new THREE.CylinderGeometry(1,1,5,32);
+            var elbowGeometry = new THREE.SphereGeometry(1.5,32,32);
+            var fingerGeometry = new THREE.CylinderGeometry(0.20,0.20,2,32);
+
+            var base = new THREE.Mesh(baseGeometry, redMaterial);
+            var arm = new THREE.Mesh(armGeometry, redMaterial);
+            var forearm = arm.clone();
+            var elbow = new THREE.Mesh(elbowGeometry, redMaterial);
+            var wrist = elbow.clone();
+            var shoulder = elbow.clone();
+            var finger1 = new THREE.Mesh(fingerGeometry, redMaterial);
+            var finger2 = finger1.clone();
+            var finger3 = finger1.clone();
+            var finger4 = finger1.clone();
+
+            base.position.set(0,0,0);
+            shoulder.position.set(0,1,0);
+            arm.position.set(0,4,0);
+            elbow.position.set(0,9,0);
+            forearm.position.set(0,14,0);
+            wrist.position.set(0,17,0);
+            finger1.position.set(0.7,18.5,-0.7);
+            finger2.position.set(-0.7,18.5,-0.7);
+            finger3.position.set(-0.7,18.5,0.7);
+            finger4.position.set(0.7,18.5,0.7);
+
+            //Groups
+            var baseGroup = new THREE.Object3D();
+            var forearmGroup = new THREE.Object3D();
+            var armGroup = new THREE.Object3D();
+            var wristGroup = new THREE.Object3D();
+            var bodyGroup = new THREE.Object3D();
+
+            baseGroup.add(base);
+
+            forearmGroup.add(finger1);
+            forearmGroup.add(finger2);
+            forearmGroup.add(finger3);
+            forearmGroup.add(finger4);
+            forearmGroup.add(wrist);
+            forearmGroup.add(elbow);
+            forearmGroup.add(forearm);
+
+            armGroup.add(shoulder);
+            armGroup.add(arm);
+
+            wristGroup.add(wrist);
+            wristGroup.add(finger1);
+            wristGroup.add(finger2);
+            wristGroup.add(finger3);
+            wristGroup.add(finger4);
+
+            bodyGroup.add(baseGroup);
+            bodyGroup.add(forearmGroup);
+            bodyGroup.add(armGroup);
+            bodyGroup.add(wristGroup);
+
+            scene.add(bodyGroup);
+
+
+            camera.position.y = 0;
+            camera.position.z = cam_zpos;
+
+
+            // create a point light
+            var pointLight = new THREE.PointLight( 0xFFFFFF );
+            pointLight.position.x = 150;
+            pointLight.position.y = 50;
+            pointLight.position.z = 130;
+
+            var pointLight2 = new THREE.PointLight( 0xFFFFFF );
+            pointLight2.position.x = -150;
+            pointLight2.position.y = -50;
+            pointLight2.position.z = -130;
+
+            scene.add(pointLight);
+            scene.add(pointLight2);
+
+
+            renderer.setClearColor(0x000000, 1);
+            var render = function () {
+                requestAnimationFrame(render);
+
+                bodyGroup.rotation.y += 0.01;
+
+                camera.position.z = cam_zpos;
+                camera.position.x = cam_xpos;
+                camera.position.y = 10;
+                camera.rotation.y = ang_rad;
+                renderer.render(scene, camera);
+            };
+            render();
+
+
+        </script>
+    </body>
+</html>
