@@ -22,9 +22,9 @@ ax1 = fig.add_subplot(111,projection='3d')
 
 
 
-x= dataset.iloc[:,0].values
-y=dataset.iloc[:,1].values
-z=dataset.iloc[:,2].values
+x= dataset.iloc[:,1].values
+y=dataset.iloc[:,2].values
+z=dataset.iloc[:,3].values
 
 ax1.scatter(x,y,z)
 ax1.set_xlabel('X');

@@ -18,7 +18,9 @@ Last modification date:
         <script src="threeViejo.min.js"> </script>
         <script>
 
-
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer();
 
             //Transforms an angle to radian terms
             function toRadians(angle){
@@ -46,22 +48,20 @@ Last modification date:
                         zpos += 5 * Math.PI / 180;
                         break;
                     case 37:
-                    camera.rotation.y -= 5 * Math.PI / 180  /* Right arrow was pressed */
+                    camera.rotation.y -= 5 * Math.PI / 180;  /* Right arrow was pressed */
 
                       /* Left arrow was pressed */
 
                         break;
                     case 39:
-                    camera.rotation.y += 5 * Math.PI / 180  /* Right arrow was pressed */
+                    camera.rotation.y += 5 * Math.PI / 180;  /* Right arrow was pressed */
                     break;
                 }
             }
             // three basic components of a scene : scene, camera, and render
             // (lights)
 
-            var scene = new THREE.Scene();
-            var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-            var renderer = new THREE.WebGLRenderer();
+
 
             function calculatePoint(angle, hypotenuse){ //Calculates a point in the gear
               var angRadians = toRadians(angle);
@@ -151,15 +151,15 @@ Last modification date:
             }
 
             function constructGearFaces(totalVectors, middle){
+
               var gearFaces = new Array();
               //Middle is where second side starts
               //Quarter is where outer vectors start
-              alert(middle);
-              var quarter = middle/2;
               var v1 = 1;
-              var v2 = 0 + quarter;
-              var v3 = 3 + quarter;
-              for(var i = v1; i < totalVectors.length / 2; i++){
+              var v2 = 0 + (middle / 2);
+              var v3 = 3 + (middle / 2);
+
+              for(var i = 0; i < totalVectors.length / 2; i++){
                 var face = new THREE.Face3(v1,v2,v3);
                 gearFaces.push(face);
                 //console.log(face.a + "," + face.b + "," + face.c);
@@ -170,8 +170,9 @@ Last modification date:
 
               v1 = 2;
               v2 = 1;
-              v3 = 3 + quarter;
-              for(var i = v1; i < totalVectors.length / 2; i++){
+              v3 = 3 + (middle / 2);
+
+              for(var i = 0; i < totalVectors.length / 2; i++){
                 var face = new THREE.Face3(v1,v2,v3);
                 gearFaces.push(face);
                 //console.log(face.a + "," + face.b + "," + face.c);
@@ -217,8 +218,10 @@ Last modification date:
             var facesInner = constructTeethFaces(vectorsInnerTotal, middleInnerStart);
             var facesOuter = constructTeethFaces(vectorsOuterTotal, middleOuterStart);
             //Make the remaining faces
-            var bodyFaces = constructGearFaces(totalVectors, totalVectors.length);
+            var bodyFaces = constructGearFaces(totalVectors, totalVectors.length / 2);
             var gearFaces = facesInner.concat(facesOuter, bodyFaces);
+
+            alert("Lo hizo!");
 
             //Create the geometry
             var GearGeometry = new THREE.Geometry();
@@ -250,11 +253,13 @@ Last modification date:
             scene.add(blueGear);
             scene.add(redGear);
 
+
+
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
 
-            camera.position.z = zpos;
+            camera.position.z = 0;
             camera.position.x = 0;
             camera.position.y = 4;
 
@@ -274,11 +279,11 @@ Last modification date:
 
             var render = function () {
                 requestAnimationFrame(render);
-                redGear.rotateZ(toRadians(rotationAngle));
-                blueGear.rotateZ(toRadians(rotationAngle));
-                camera.position.z = zpos;
+
+
                 renderer.render(scene, camera);
             };
+
             render();
 
         </script>

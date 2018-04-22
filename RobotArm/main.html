@@ -8,6 +8,7 @@
     <body>
         <script src="threeViejo.min.js"> </script>
         <script>
+          var restrictionAngle = 120;
             //Transforms an angle to radian terms
             function toRadians(angle){
               return (Math.PI * angle) / 180;
@@ -43,38 +44,78 @@
                       break;
 
                   case 71: //G
-                    armGroup.rotation.y += 0.1;
-                    forearmGroup.rotation.y += 0.1;
-                    wristGroup.rotation.y += 0.1;
+                    if(armGroup.rotation.y < toRadians(restrictionAngle) && armGroup.rotation.y > toRadians(-restrictionAngle)){
+                      armGroup.rotation.y += 0.1;
+                      forearmGroup.rotation.y += 0.1;
+                      wristGroup.rotation.y += 0.1;
+                    }
+                    else{
+
+                    }
+
                   break;
                   case 84: //T
-                    armGroup.rotation.y -= 0.1;
-                    forearmGroup.rotation.y -= 0.1;
-                    wristGroup.rotation.y -= 0.1;
+                    if(armGroup.rotation.y < toRadians(restrictionAngle) && armGroup.rotation.y > toRadians(-restrictionAngle)){
+                      armGroup.rotation.y -= 0.1;
+                      forearmGroup.rotation.y -= 0.1;
+                      wristGroup.rotation.y -= 0.1;
+                    }
+                    else{
+
+                    }
+
                   break;
                   case 70: //F
-                    armGroup.rotation.x += 0.1;
-                    forearmGroup.rotation.x += 0.1;
-                    wristGroup.rotation.x += 0.1;
+                    if(armGroup.rotation.x < toRadians(restrictionAngle) && armGroup.rotation.x > toRadians(-restrictionAngle)){
+                      armGroup.rotation.x += 0.1;
+                      forearmGroup.rotation.x += 0.1;
+                      wristGroup.rotation.x += 0.1;
+                    }
+                    else{
+
+                    }
                   break;
                   case 82: //R
-                    armGroup.rotation.x -= 0.1;
-                    forearmGroup.rotation.x -= 0.1;
-                    wristGroup.rotation.x -= 0.1;
+                    if(armGroup.rotation.x < toRadians(restrictionAngle) && armGroup.rotation.x > toRadians(-restrictionAngle)){
+                      armGroup.rotation.x -= 0.1;
+                      forearmGroup.rotation.x -= 0.1;
+                      wristGroup.rotation.x -= 0.1;
+                    }
+                    else{
+
+                    }
+
                   break;
                   case 72: //H
-                    forearmGroup.rotation.x += 0.1;
-                    wristGroup.rotation.x += 0.1;
+                    if(forearmGroup.rotation.x < toRadians(restrictionAngle) && forearmGroup.rotation.x > toRadians(-restrictionAngle)){
+                      forearmGroup.rotation.x += 0.1;
+                      //wristGroup.rotation.x += 0.1;
+                    }
                   break;
                   case 89: //Y
-                    forearmGroup.rotation.x -= 0.1;
-                    wristGroup.rotation.x -=0.1;
+                    if(forearmGroup.rotation.x < toRadians(restrictionAngle) && forearmGroup.rotation.x > toRadians(-restrictionAngle)){
+                      forearmGroup.rotation.x -= 0.1;
+                      //wristGroup.rotation.x -=0.1;
+                    }
+                    else{
+
+                    }
                   break;
                   case 74: //J
-                    wristGroup.rotation.x += 0.1;
+                    if(wristGroup.rotation.x < toRadians(restrictionAngle) && wristGroup.rotation.x > toRadians(-restrictionAngle)){
+                      wristGroup.rotation.x += 0.1;
+                    }
+                    else{
+
+                    }
                   break;
                   case 85: //U
-                    wristGroup.rotation.x -=0.1;
+                    if(wristGroup.rotation.x < toRadians(restrictionAngle) && wristGroup.rotation.x > toRadians(-restrictionAngle)){
+                      wristGroup.rotation.x -=0.1;
+                    }
+                    else{
+
+                    }
                   break;
 
               }
@@ -114,10 +155,10 @@
             elbow.position.set(0,9,0);
             forearm.position.set(0,14,0);
             wrist.position.set(0,17,0);
-            finger1.position.set(0.7,18.5,-0.7);
-            finger2.position.set(-0.7,18.5,-0.7);
-            finger3.position.set(-0.7,18.5,0.7);
-            finger4.position.set(0.7,18.5,0.7);
+            finger1.position.set(0.7,18,-0.7);
+            finger2.position.set(-0.7,18,-0.7);
+            finger3.position.set(-0.7,18,0.7);
+            finger4.position.set(0.7,18,0.7);
 
             //Groups
             baseGroup = new THREE.Object3D();
@@ -131,16 +172,27 @@
 
             forearmGroup.add(elbow);
             forearmGroup.add(forearm);
+            forearmGroup.add(wrist);
+            forearmGroup.add(finger1);
+            forearmGroup.add(finger2);
+            forearmGroup.add(finger3);
+            forearmGroup.add(finger4);
 
             armGroup.add(shoulder);
             armGroup.add(arm);
+            armGroup.add(elbow);
+            armGroup.add(forearm);
+            armGroup.add(wrist);
+            armGroup.add(finger1);
+            armGroup.add(finger2);
+            armGroup.add(finger3);
+            armGroup.add(finger4);
 
             wristGroup.add(wrist);
             wristGroup.add(finger1);
             wristGroup.add(finger2);
             wristGroup.add(finger3);
             wristGroup.add(finger4);
-
 
 
 
