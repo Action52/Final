@@ -1,0 +1,222 @@
+<html>
+    <head>
+        <title> Creating groups </title>
+        <style>
+            canvas { width: 100%; height: 100% }
+        </style>
+    </head>
+    <body>
+        <script src="three.js/build/three.min.js"> </script>
+        <script src="three.js/examples/js/loaders/DDSLoader.js"></script>
+		    <script src="three.js/examples/js/loaders/MTLLoader.js"></script>
+		    <script src="three.js/examples/js/loaders/OBJLoader.js"></script>
+        <script>
+
+            var baskets = [];
+
+            function toRadians(angle){
+              return (Math.PI * angle) / 180;
+            }
+
+            window.addEventListener('keydown',doKeyDown,true);
+            var cam_zpos = 20.0;
+            var cam_xpos = 0.0;
+            var Pi = 3.14159265358;
+            // x grados a radianes -        x * Pi / 180
+            // x radianes a grados -        x * 180 / Pi
+            var ang_rad = 0;
+
+            function doKeyDown(evt){
+              console.log("Tecla picada: "+evt.keyCode);
+              switch (evt.keyCode) {
+                  case 38:  /* Up arrow was pressed */
+                      var dx = 0.5 * Math.sin(ang_rad);
+                      var dz = 0.5 * Math.cos(ang_rad);
+                      cam_zpos -= dz;
+                      cam_xpos -= dx;
+                      break;
+                  case 40:  /* Down arrow was pressed */
+                      var dx = 0.5 * Math.sin(ang_rad);
+                      var dz = 0.5 * Math.cos(ang_rad);
+                      cam_zpos += dz;
+                      cam_xpos += dx;
+                      break;
+                  case 37:  /* Left arrow was pressed */
+                      ang_rad += (5* Pi / 180);
+                      break;
+                  case 39:  /* Right arrow was pressed */
+                      ang_rad -= (5* Pi / 180);
+                      break;
+              }
+            }
+            var redMaterial = new THREE.MeshLambertMaterial({
+                color: 0xaaaaaa                             });
+
+
+
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.01, 1000);
+            var renderer = new THREE.WebGLRenderer( {alpha: true} );
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            var redMaterial = new THREE.MeshLambertMaterial({
+                color: 0xaaaaaa                             });
+
+
+            //camera.add(basket);
+
+            camera.position.y = 0;
+            camera.position.z = cam_zpos;
+
+
+            // create a point light
+            var pointLight = new THREE.PointLight( 0xFFFFFF );
+            pointLight.position.x = 150;
+            pointLight.position.y = 50;
+            pointLight.position.z = 130;
+
+            var ambientLight = new THREE.AmbientLight( 0xcccccc );
+            scene.add( ambientLight );
+
+            scene.add(pointLight);
+            scene.add(ambientLight);
+
+
+
+            renderer.setClearColor(0x000000, 1);
+            //loadBasket();
+
+
+            var basket1 = new THREE.Mesh();
+            function loadBasket(){
+              var onProgress = function ( xhr ) {
+                  if ( xhr.lengthComputable ) {
+                      var percentComplete = xhr.loaded / xhr.total * 100;
+                      console.log( Math.round(percentComplete, 2) + '% downloaded' );
+                  }
+              };
+
+              var onError = function ( xhr ) { };
+              THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
+
+              var mtlLoader = new THREE.MTLLoader();
+
+              //LOAD
+              var obj;
+              mtlLoader.load( 'Texturas/basket.mtl', function( materials ) {
+                  materials.preload();
+                  var objLoader = new THREE.OBJLoader();
+                  objLoader.setMaterials( materials );
+                  objLoader.load( 'Texturas/basket.obj', function ( object ) {
+                      obj = object;
+                      object.traverse( function ( child )
+                      {
+                          if ( child instanceof THREE.Mesh )
+                          {
+                              child.material = redMaterial;
+                          }
+                      } );
+
+                      baskets.push(obj);
+
+                  }, onProgress, onError );
+              });
+            }
+
+
+
+            var numBaskets = 10;
+            var angleInc = 360/numBaskets;
+            var angleAct = 90;
+            var radius = 5;
+            for(var i = 0; i < numBaskets; i++){
+              loadBasket();
+            }
+
+            alert(baskets.length);
+            for(var i = 0; i < numBaskets; i++){
+              var x = Math.cos(toRadians(angleAct)) * radius;
+              var y = Math.sin(toRadians(angleAct)) * radius;
+              baskets[i].position.set(x,y,0);
+              angleAct+=angleInc;
+              console.log("Im iterating");
+            }
+
+            var basketGroup = new THREE.Object3D();
+            for(var i = 0; i < numBaskets; i++){
+              basketGroup.add(baskets[i]);
+            }
+
+            scene.add(basketGroup);
+
+            var sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+            var sphere = new THREE.Mesh(sphereGeometry, redMaterial);
+            sphere.position.set(0,1,0);
+            var sphereGroup = new THREE.Object3D();
+            //sphereGroup.add(sphere);
+            sphereGroup.add(basketGroup);
+            sphereGroup.position.set(0,3,0);
+            scene.add(sphereGroup);
+
+            var armGeometry = new THREE.CylinderGeometry(0.3, 0.3, 10, 32);
+            var arm = new THREE.Mesh(armGeometry, redMaterial);
+            //scene.add(arm);
+            var armAngle = 100;
+            var actArm;
+            var armGroup = new THREE.Object3D();
+            for(var i = 0; i < numBaskets; i++){
+              actArm = arm.clone();
+              actArm.rotation.z += toRadians(armAngle);
+              armGroup.add(actArm);
+              armAngle+=angleInc;
+            }
+            armGroup.position.set(0,4,-1);
+            scene.add(armGroup);
+
+            var baseArm = arm.clone();
+            baseArm.position.z = -1;
+            scene.add(baseArm);
+
+
+            // create an AudioListener and add it to the camera
+            var listener = new THREE.AudioListener();
+            camera.add( listener );
+
+            // create the PositionalAudio object (passing in the listener)
+            var sound = new THREE.PositionalAudio( listener );
+
+            // load a sound and set it as the PositionalAudio object's buffer
+            var audioLoader = new THREE.AudioLoader();
+            audioLoader.load( 'Texturas/Circus.ogx', function( buffer ) {
+            	sound.setBuffer( buffer );
+            	sound.setRefDistance( 1 );
+            	sound.play();
+            });
+
+            // create an object for the sound to play from
+
+            // finally add the sound to the mesh
+            armGroup.add( sound );
+
+
+            var render = function () {
+                requestAnimationFrame(render);
+                armGroup.rotation.z += toRadians(0.5);
+                sphereGroup.rotation.z += toRadians(0.5);
+                for(var i = 0; i < numBaskets; i++){
+                  baskets[i].rotation.z-= toRadians(0.5);
+                }
+                //basketGroup.rotation.z += toRadians(-0.5);
+                camera.position.z = cam_zpos;
+                camera.position.x = cam_xpos;
+                camera.position.y = 3;
+                camera.rotation.y = ang_rad;
+                renderer.render(scene, camera);
+            };
+            render();
+
+
+        </script>
+    </body>
+</html>

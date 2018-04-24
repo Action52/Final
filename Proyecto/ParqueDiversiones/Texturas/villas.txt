@@ -1,0 +1,33 @@
+
+var container = new THREE.Mesh();
+
+var onProgress = function ( xhr ) {
+    if ( xhr.lengthComputable ) {
+        var percentComplete = xhr.loaded / xhr.total * 100;
+        console.log( Math.round(percentComplete, 2) + '% downloaded' );
+    }
+};
+
+var onError = function ( xhr ) { };
+THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
+
+var mtlLoader = new THREE.MTLLoader();
+
+//LOAD
+var obj;
+mtlLoader.load( 'obj/shirtLowNoSleeves.mtl', function( materials ) {
+    materials.preload();
+    var objLoader = new THREE.OBJLoader();
+    objLoader.setMaterials( materials );
+    objLoader.load( 'obj/shirtLowNoSleeves.obj', function ( object ) {
+        obj = object;
+        object.traverse( function ( child )
+        {
+            if ( child instanceof THREE.Mesh )
+            {
+                child.material = materials;    
+            }
+        } );
+        container.add(obj);
+    }, onProgress, onError );
+});
