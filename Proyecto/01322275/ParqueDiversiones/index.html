@@ -1,0 +1,556 @@
+<html>
+    <head>
+        <title> Creating groups </title>
+        <style>
+            canvas { width: 100%; height: 100% }
+        </style>
+    </head>
+    <body>
+        <script src="three.js/build/three.min.js"> </script>
+        <script src="three.js/examples/js/loaders/DDSLoader.js"></script>
+		    <script src="three.js/examples/js/loaders/MTLLoader.js"></script>
+		    <script src="three.js/examples/js/loaders/OBJLoader.js"></script>
+        <script>
+
+            var baskets = [];
+
+            function toRadians(angle){
+              return (Math.PI * angle) / 180;
+            }
+
+            window.addEventListener('keydown',doKeyDown,true);
+            var cam_zpos = 20.0;
+            var cam_xpos = 0.0;
+            var Pi = 3.14159265358;
+            // x grados a radianes -        x * Pi / 180
+            // x radianes a grados -        x * 180 / Pi
+            var ang_rad = 0;
+
+            function doKeyDown(evt){
+                switch (evt.keyCode) {
+                    case 87:  //W
+                        camera.position.y+=cameraMove;
+                        break;
+                    case 65:  //A
+                      angle+=90;
+                        camera.position.z -= (cameraMove*Math.cos( (angle*(Math.PI/180))  ));
+                        camera.position.x -= (cameraMove*Math.sin( (angle*(Math.PI/180))  ));
+                        angle-=90;
+                        break;
+                    case 83:  //S
+                        camera.position.y-=cameraMove;
+                        break;
+                    case 68:  //D
+                        angle-=90;
+                        camera.position.z -= (cameraMove*Math.cos( (angle*(Math.PI/180))  ));
+                        camera.position.x -= (cameraMove*Math.sin( (angle*(Math.PI/180))  ));
+                        angle+=90;
+                        break;
+                    case 38://Up
+                        camera.position.z -= (cameraMove*Math.cos( (angle*(Math.PI/180))  ));
+                        camera.position.x -= (cameraMove*Math.sin( (angle*(Math.PI/180))  ));
+                        break;
+                    case 37://Left
+                        camera.rotation.y += (10 * Math.PI / 180  );
+                        angle+=10;
+                        break;
+                    case 40://Down
+                        camera.position.z += (cameraMove*Math.cos( (angle*(Math.PI/180))  ));
+                        camera.position.x += (cameraMove*Math.sin( (angle*(Math.PI/180))  ));
+                        break;
+                    case 39://Right
+                      camera.rotation.y -= (10 * Math.PI / 180  );
+                        angle-=10;
+                        break;
+
+
+
+                }
+            }
+
+            //ALL MATERIALS:
+            var BlackMt = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture("img/wood.jpg"),color: 0x000000,wireframe: false})
+
+            var Marmol = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture("img/marmolcafe.jpg"),color: 0xFFFFFF,wireframe: false})
+
+             var MarmolCylMaterial = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture("img/marmol.jpg"),color: 0xFFFFFF,wireframe: false});
+
+             var woodPlanks = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture("img/shwood.jpeg"),color: 0xCC9933,wireframe: false});
+            var Lollipop = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture("img/lp.jpg"),color: 0xFFFFFF,wireframe: false})
+             var circusTop = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture("img/circus.jpg"),color: 0xFFFFFF,wireframe: false});
+             var cabina = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture("img/cabina.jpg"),color: 0xFFFFFF, wireframe: false})
+
+             var gyroBaseMat = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture("img/metal.jpg"),color: 0xFFFFFF, wireframe: false})
+
+            var redMaterial = new THREE.MeshLambertMaterial({
+                color: 0xaaaaaa                             });
+
+
+
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.01, 1000);
+            var renderer = new THREE.WebGLRenderer( {alpha: true} );
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            camera.position.set(0,0,5);
+            renderer.shadowMapEnabled = true;
+            renderer.shadowMapType = THREE.PCFSoftShadowMap;
+            var limits = 3;
+            var updown = 0.013;
+            renderer.setClearColor(0x6699CC);
+            var gf = new THREE.CubeGeometry( 1000, 1, 1000);
+            var mf = new THREE.MeshPhongMaterial( {color: 0x006600,wireframe: false} );
+            var floor = new THREE.Mesh( gf, mf );
+            floor.position.set(-250,-10,-250);
+
+            var angle = 0.0;
+            var cameraMove = 1;
+
+
+            //camera.add(basket);
+
+            camera.position.y = 0;
+            camera.position.z = cam_zpos;
+
+
+            //Light
+                var lightpoint = new THREE.PointLight(0xCCCCCC);
+                var lightpoint2 = new THREE.PointLight(0xCCCCCC);
+                var lightpoint3 = new THREE.PointLight(0xCCCCCC);
+
+
+
+                scene.add(lightpoint);
+                scene.add(lightpoint2);
+                scene.add(lightpoint3);
+
+
+                lightpoint.position.set(0,100,0);
+                lightpoint2.position.set(0,-100,0);
+                lightpoint3.position.set(0,0,100);
+
+
+            renderer.setClearColor(0x000000, 1);
+            //loadBasket();
+
+
+
+            //Gyro tower
+
+            var GyroGroup = new THREE.Object3D();
+
+           var gyroGeo =new THREE.TorusGeometry( 5, 3, 6, 100 );
+           var torus = new THREE.Mesh( gyroGeo, cabina );
+           var baseGeometry = new THREE.CylinderGeometry( 5, 5, 35, 64 );
+           var cylinderGyro = new THREE.Mesh( baseGeometry, gyroBaseMat );
+
+            GyroGroup.add( torus);
+              torus.rotation.x+=Math.PI/2;
+              torus.position.y-=14;
+
+               GyroGroup.add( cylinderGyro );
+
+
+               GyroGroup.scale.set(0.75,0.75,0.75);
+
+               GyroGroup.position.y= -0.2;
+               GyroGroup.position.x= -9.2;
+
+               scene.add(GyroGroup);
+
+
+          //Carrousel
+            var CarrouselGroup = new THREE.Object3D();
+
+              function makeHorse(){
+                //Geometries
+                  var HorseBody = new THREE.CubeGeometry(13,5,5);
+                  var HorseNeck = new THREE.CubeGeometry(7,3,1);
+                  var HorseHead = new THREE.CubeGeometry(5,2,2);
+                  var HorseTail = new THREE.CubeGeometry(2,2,2);
+                  var HorseLeg = new THREE.CubeGeometry(1.5,5,1.5);
+                  var HorseEye = new THREE.CubeGeometry(1,1,1);
+                  var HorseHoof = new THREE.CubeGeometry(1.5,1.5,1.5);
+                  var HorseNose = new THREE.CubeGeometry(1.01,2.01,2.01);
+
+                //Mesh
+                  var BodyMesh = new THREE.Mesh(HorseBody,Marmol);
+                  var NeckMesh = new THREE.Mesh(HorseNeck,Marmol);
+                  var HeadMesh = new THREE.Mesh(HorseHead,Marmol);
+                  var RightEye = new THREE.Mesh(HorseEye,BlackMt);
+                  var LeftEye = new THREE.Mesh(HorseEye,BlackMt);
+                  var Nose = new THREE.Mesh(HorseNose,BlackMt);
+                  var Tail = new THREE.Mesh(HorseTail,BlackMt);
+                  var FrontLeg1 = new THREE.Mesh(HorseLeg,Marmol);
+                  var FrontLeg2 = new THREE.Mesh(HorseLeg,Marmol);
+                  var BackLeg1 = new THREE.Mesh(HorseLeg,Marmol);
+                  var BackLeg2 = new THREE.Mesh(HorseLeg,Marmol);
+                  var FrontHoof1 = new THREE.Mesh(HorseHoof,BlackMt);
+                  var FrontHoof2 = new THREE.Mesh(HorseHoof,BlackMt);
+                  var BackHoof1 = new THREE.Mesh(HorseHoof,BlackMt);
+                  var BackHoof2 = new THREE.Mesh(HorseHoof,BlackMt);
+
+                //Groups
+                  var Group1 = new THREE.Object3D(); //eyes
+                  var Group2 = new THREE.Object3D(); //Legs
+                  var Group3 = new THREE.Object3D(); //Legs front
+                  var Group4 = new THREE.Object3D(); //Legs back
+                  var Group5 = new THREE.Object3D(); //Head
+                  var GeneralGroup = new THREE.Object3D();
+
+                  Group1.add(RightEye);
+                  Group1.add(LeftEye);
+                  Group5.add(Nose);
+                  Group5.add(NeckMesh);
+                  Group5.add(HeadMesh);
+                  Group5.add(Group1);
+                  Group3.add(FrontLeg1);
+                  Group3.add(FrontLeg2);
+                  Group3.add(FrontHoof1);
+                  Group3.add(FrontHoof2);
+                  Group4.add(BackLeg1);
+                  Group4.add(BackLeg2);
+                  Group4.add(BackHoof1);
+                  Group4.add(BackHoof2);
+                  Group2.add(Group3);
+                  Group2.add(Group4);
+                  GeneralGroup.add(Group2);
+                  GeneralGroup.add(Group5);
+                  GeneralGroup.add(BodyMesh);
+                  GeneralGroup.add(Tail);
+
+                //Rotations and positions
+
+                  RightEye.position.z+=1;
+                  LeftEye.position.z-=1;
+                  RightEye.position.x-=0.3;
+                  LeftEye.position.x-=0.3;
+
+                  Group1.position.x-=4.5;
+                  Group1.position.y+=7.5;
+
+                  Group3.rotation.z-=(Math.PI/180);
+                  Group4.rotation.z+=(Math.PI/180);
+
+                  FrontLeg1.position.y-=2.5;
+                  FrontLeg2.position.y-=2.5;
+                  BackLeg1.position.y-=2.5;
+                  BackLeg2.position.y-=2.5;
+
+                  FrontHoof1.position.y-=5.7;
+                  FrontHoof2.position.y-=5.7;
+                  BackHoof1.position.y-=5.7;
+                  BackHoof2.position.y-=5.7;
+
+                  Group3.position.y+=2.5;
+                  Group4.position.y+=2.5;
+
+                  FrontLeg1.position.z+=1.8;
+                  FrontLeg2.position.z-=1.8;
+                  BackLeg1.position.z+=1.8;
+                  BackLeg2.position.z-=1.8;
+
+                  FrontHoof1.position.z+=1.8;
+                  FrontHoof2.position.z-=1.8;
+                  BackHoof1.position.z+=1.8;
+                  BackHoof2.position.z-=1.8;
+
+                  NeckMesh.rotation.z+=(90*Math.PI/180);
+                  NeckMesh.position.x-=3;
+                  NeckMesh.position.y+=5;
+
+                  Group2.position.y-=4;
+
+                  HeadMesh.position.y+=7.5;
+                  HeadMesh.position.x-=5;
+
+                  Nose.position.y+=7.5;
+                  Nose.position.x-=7;
+
+                  Tail.position.x+=7.5;
+
+                  Group3.position.x-=4.3;
+                  Group4.position.x+=4.3;
+                  GeneralGroup.scale.set(0.28,0.28,0.28);
+
+                return GeneralGroup;
+              }
+
+              function makeCyl(){
+                  var cylGeoHorse = new THREE.CylinderGeometry(0.30,0.30,10);
+                  var cylMesh = new THREE.Mesh(cylGeoHorse,MarmolCylMaterial);
+                  cylMesh.position.y+=2.5;
+                  return cylMesh;
+              }
+
+              var HorseCylUnion = new THREE.Object3D();
+
+              var unionAngle = 0;
+              var updownHorse = 360/(15/2);
+              var HorseDownGroup = [];
+              var HorseUpGroup = [];
+              var Cylgroup = [];
+              var GeneralGroups = [];
+
+              var aux = 0; //Aux var
+              for(var i = 0; i < (15/2); i++){
+                HorseUpGroup[i] = makeHorse();
+                Cylgroup[aux] = makeCyl();
+
+                GeneralGroups[aux] = new THREE.Object3D();
+                GeneralGroups[aux].add(HorseUpGroup[i]);
+                GeneralGroups[aux].add(Cylgroup[aux]);
+
+                var x = (18*(Math.sin(unionAngle*Math.PI/180)));
+                var z = (18*(Math.cos(unionAngle*Math.PI/180))); //First group of horses positioning
+
+                GeneralGroups[aux].position.set(x,0,z); //Positioning
+                GeneralGroups[aux].rotation.y+=(unionAngle*Math.PI/180); //Rotation
+
+                HorseCylUnion.add(GeneralGroups[aux]);
+                aux++;
+
+                HorseDownGroup[i] = makeHorse();
+                Cylgroup[aux] = makeCyl();
+
+                GeneralGroups[aux] = new THREE.Object3D();
+                GeneralGroups[aux].add(HorseDownGroup[i]);
+                GeneralGroups[aux].add(Cylgroup[aux]);
+
+                 x = (13*(Math.sin(unionAngle*Math.PI/180)));
+                 z = (13*(Math.cos(unionAngle*Math.PI/180))); //Second group of horses positioning
+                GeneralGroups[aux].position.set(x,0,z);
+                GeneralGroups[aux].rotation.y+=(unionAngle*Math.PI/180);
+
+                HorseCylUnion.add(GeneralGroups[aux]);
+
+                unionAngle+=updownHorse;
+
+              }
+
+              //Carousel contruction
+
+
+
+              //Geometry
+               var floorCarrouselGeometry = new THREE.CylinderGeometry(1,21,0.25,360,9,false,0,Math.PI*2);
+               var cylMeshGeometry = new THREE.CylinderGeometry(2.5,2.5,15,360,1,false,0,Math.PI*2);
+              var RoofCarrouselGeometry = new THREE.CylinderGeometry(12,21,5,300,1,false,0,Math.PI*2);
+
+              //Mesh
+              var floorCarrousel = new THREE.Mesh(floorCarrouselGeometry, woodPlanks);
+              floorCarrousel.position.y-=3;
+              var centerCyl = new THREE.Mesh(cylMeshGeometry, Lollipop);
+              centerCyl.position.y+=5;
+              var RoofCarrousel = new THREE.Mesh(RoofCarrouselGeometry, circusTop);
+              RoofCarrousel.position.y+=10;
+
+            CarrouselGroup.add(floorCarrousel);
+            CarrouselGroup.add(centerCyl);
+            CarrouselGroup.add(RoofCarrousel);
+            CarrouselGroup.add(HorseCylUnion);
+
+
+
+            CarrouselGroup.position.x+=25;
+            CarrouselGroup.position.y-=6.5;
+            CarrouselGroup.scale.set(0.75,0.75,0.75);
+
+              scene.add(CarrouselGroup);
+
+
+              let sube = true;
+              let torusPos = 0;
+              var speed = 0.015;
+              var limites = 2;
+              var arriba = false;
+              var abajo= 0;
+
+            var basket1 = new THREE.Mesh();
+            function loadBasket(){
+              var onProgress = function ( xhr ) {
+                  if ( xhr.lengthComputable ) {
+                      var percentComplete = xhr.loaded / xhr.total * 100;
+                      console.log( Math.round(percentComplete, 2) + '% downloaded' );
+                  }
+              };
+
+              var onError = function ( xhr ) { };
+              THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
+
+              var mtlLoader = new THREE.MTLLoader();
+
+              //LOAD
+              var obj;
+              mtlLoader.load( 'Texturas/basket.mtl', function( materials ) {
+                  materials.preload();
+                  var objLoader = new THREE.OBJLoader();
+                  objLoader.setMaterials( materials );
+                  objLoader.load( 'Texturas/basket.obj', function ( object ) {
+                      obj = object;
+                      object.traverse( function ( child )
+                      {
+                          if ( child instanceof THREE.Mesh )
+                          {
+                              child.material = redMaterial;
+                          }
+                      } );
+
+                      baskets.push(obj);
+
+                  }, onProgress, onError );
+              });
+            }
+
+
+
+            var numBaskets = 10;
+            var angleInc = 360/numBaskets;
+            var angleAct = 90;
+            var radius = 5;
+            for(var i = 0; i < numBaskets; i++){
+              loadBasket();
+            }
+
+            alert(baskets.length);
+            for(var i = 0; i < numBaskets; i++){
+              var x = Math.cos(toRadians(angleAct)) * radius;
+              var y = Math.sin(toRadians(angleAct)) * radius;
+              baskets[i].position.set(x,y,0);
+              angleAct+=angleInc;
+              console.log("Im iterating");
+            }
+
+            var basketGroup = new THREE.Object3D();
+            for(var i = 0; i < numBaskets; i++){
+              basketGroup.add(baskets[i]);
+            }
+
+            scene.add(basketGroup);
+
+            var sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+            var sphere = new THREE.Mesh(sphereGeometry, redMaterial);
+            sphere.position.set(0,1,0);
+            var sphereGroup = new THREE.Object3D();
+            //sphereGroup.add(sphere);
+            sphereGroup.add(basketGroup);
+            sphereGroup.position.set(0,3,0);
+            scene.add(sphereGroup);
+
+            var armGeometry = new THREE.CylinderGeometry(0.3, 0.3, 10, 32);
+            var arm = new THREE.Mesh(armGeometry, redMaterial);
+            //scene.add(arm);
+            var armAngle = 100;
+            var actArm;
+            var armGroup = new THREE.Object3D();
+            for(var i = 0; i < numBaskets; i++){
+              actArm = arm.clone();
+              actArm.rotation.z += toRadians(armAngle);
+              armGroup.add(actArm);
+              armAngle+=angleInc;
+            }
+            armGroup.position.set(0,4,-1);
+            scene.add(armGroup);
+
+            var baseArm = arm.clone();
+            baseArm.position.z = -1;
+            scene.add(baseArm);
+
+
+            // create an AudioListener and add it to the camera
+            var listener = new THREE.AudioListener();
+            camera.add( listener );
+
+            // create the PositionalAudio object (passing in the listener)
+            var sound = new THREE.PositionalAudio( listener );
+
+            // load a sound and set it as the PositionalAudio object's buffer
+            var audioLoader = new THREE.AudioLoader();
+            audioLoader.load( 'Texturas/Circus.ogx', function( buffer ) {
+            	sound.setBuffer( buffer );
+            	sound.setRefDistance( 1 );
+            	sound.play();
+            });
+
+            // create an object for the sound to play from
+
+            // finally add the sound to the mesh
+            armGroup.add( sound );
+
+
+            var render = function () {
+                requestAnimationFrame(render);
+                armGroup.rotation.z += toRadians(0.5);
+                sphereGroup.rotation.z += toRadians(0.5);
+                for(var i = 0; i < numBaskets; i++){
+                  baskets[i].rotation.z-= toRadians(0.5);
+                }
+                //basketGroup.rotation.z += toRadians(-0.5);
+                camera.position.z = cam_zpos;
+                camera.position.x = cam_xpos;
+                camera.position.y = 3;
+                camera.rotation.y = ang_rad;
+                CarrouselGroup.rotation.y-=(0.35*Math.PI/180);
+
+                for(var i = 0; i < (15/2); i++){
+
+                  if(abajo == 1){
+                    HorseUpGroup[i].position.y-=speed;
+                    HorseDownGroup[i].position.y-=speed;
+                    limites -= speed;
+                    if(limites <0){
+                      abajo = 0;
+                    }
+
+                  }else{
+
+                  if(limites < 7){
+                    HorseUpGroup[i].position.y+=speed;
+                    HorseDownGroup[i].position.y+=speed;
+                    limites += speed;
+                    if (limites > 6){
+                      abajo = 1;
+                    }
+                  }
+
+                }
+
+
+
+
+
+
+
+                }
+
+
+
+
+
+
+                renderer.render(scene, camera);
+
+                requestAnimationFrame(render);
+
+                if (sube) {
+                      torus.position.y += 0.25;
+                      torusPos+=0.25;
+                      if (torusPos==30) {
+                        sube=false
+                      }
+                  }
+                  else{
+                      torus.position.y -= 1.0;
+                      torusPos--;
+                      if (torusPos==0) {
+                        sube=true
+                      }
+                  }
+            };
+            render();
+
+
+        </script>
+    </body>
+</html>
