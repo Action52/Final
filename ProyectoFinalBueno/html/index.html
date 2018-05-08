@@ -1,9 +1,23 @@
+<!----
+
+Armando Canto  Garcia A01322361
+Luis Alfredo Leon Villapun A01322275
+
+
+
+-->
+
+
+
+
+
+
 <html>
     <head>
       <meta charset="utf-8">
         <title> Parque</title>
         <style>
-            canvas { width: 100%; height: 100% }
+           
         </style>
     </head>
     <body>
@@ -21,34 +35,23 @@
             var renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
-            camera.position.set(0,0,5);
-            renderer.shadowMapEnabled = true;
-            renderer.shadowMapType = THREE.PCFSoftShadowMap;
-            renderer.setClearColor(0x6699CC);
-            var gf = new THREE.CubeGeometry( 1000, 1, 1000);
-            var mf = new THREE.MeshPhongMaterial( {color: 0x006600,wireframe: false} );
-            var floor = new THREE.Mesh( gf, mf );
-            floor.position.set(-250,0,-250);
-            floor.position.y = 100;
-
+            camera.position.set(0,2,17);
+            renderer.setClearColor(0x4dd2ff);     //Sky
             var angle = 0.0; 
             var cameraMove = 1 
-
-
-            var gf = new THREE.CubeGeometry( 1000, 1, 1000);
-            var mf = new THREE.MeshPhongMaterial( {color: 0x006600,wireframe: false} );
-            var floor = new THREE.Mesh( gf, mf );
+            var grassGeo = new THREE.CubeGeometry( 1000, 1, 1000); //Grass declaration
+            var grassMesh = new THREE.MeshPhongMaterial( {color: 0x00b300,wireframe: false} );
+            var floor = new THREE.Mesh( grassGeo, grassMesh );
             floor.position.set(-250,-10,-250);
             scene.add(floor);
-
             var ang_rad = 0;
             var canRotateWheel = 1;
             var doorsOpen = false;
             var hoodOpen = false;
             var trunkOpen = false;
+            var deployDrone = 0 ;
             
-
-            function toRadians(angle){
+            function toRadians(angle){ //Function to  get radians
               return (Math.PI * angle) / 180;
             }
 
@@ -57,6 +60,16 @@
                 switch (evt.keyCode) {
                     case 87:  //W
                         camera.position.y+=cameraMove;
+                        break;
+
+                    case 88:  //W
+                        if(deployDrone == 0){
+                        deployDrone = 1;
+                      }
+                        else if (deployDrone== 1){
+                          deployDrone = 0;
+                         
+                        }
                         break;
                     case 65:  //A
                       angle+=90;
@@ -94,6 +107,8 @@
                         case 71: //G go backward car
                       carGroup.position.z -= Math.cos(carWheelFrontLeftGroup.rotation.y  );
                       carGroup.position.x -= Math.sin(carWheelFrontLeftGroup.rotation.y  );
+                      carGroup.rotation.y = carWheelFrontLeftGroup.rotation.y;
+
                       if(carGroup.rotation.y){
 
                       }
@@ -101,6 +116,8 @@
                     case 84: //T go forward car
                       carGroup.position.z += Math.cos(carWheelFrontLeftGroup.rotation.y  );
                       carGroup.position.x += Math.sin(carWheelFrontLeftGroup.rotation.y  );
+                      carGroup.rotation.y = carWheelFrontLeftGroup.rotation.y;
+
                       break;
                     case 70: //F rotate wheels
                       if(canRotateWheel <= 3){
@@ -164,17 +181,21 @@
             var lightpoint = new THREE.PointLight(0xCCCCCC);
             var lightpoint2 = new THREE.PointLight(0xCCCCCC);
             var lightpoint3 = new THREE.PointLight(0xCCCCCC);
+            var lightpoint4 = new THREE.PointLight(0xCCCCCC);
 
 
 
             scene.add(lightpoint);
             scene.add(lightpoint2);
             scene.add(lightpoint3);
+            scene.add(lightpoint4);
 
 
             lightpoint.position.set(0,100,0);
             lightpoint2.position.set(0,-100,0);
             lightpoint3.position.set(0,0,100);
+            lightpoint3.position.set(50,0,0);
+
 
 
             //ALL MATERIALS:
@@ -201,8 +222,10 @@
 
 
 
-          //Drone
+          //Drone implementation
 
+
+          //Creation of the drone body
           var Drone = new THREE.Object3D();
           var DroneGeo =new THREE.TorusGeometry( 2, 0.5, 6, 100 );
           var baseWingGeo =new THREE.CylinderGeometry(0.28, 0.28, 0.7, 100);
@@ -223,6 +246,7 @@
           var wingSupport4 = new THREE.Mesh( wingSupportGeo, DroneSkin );
 
 
+        //Function that makes wings
         function makeWing(){
         var Wing = new THREE.Object3D();
         var geometryWing = new THREE.RingGeometry( 12, 5, 7 );
@@ -256,7 +280,7 @@
 
 
 
-
+        //Wings creation
         WingGroup = [];
         for(var i = 0;i<4;i++){
           WingGroup[i] = makeWing();
@@ -314,10 +338,6 @@
 
           baseWing1.rotation.x+=Math.PI/2;
           baseWing2.rotation.x+=Math.PI/2;
-
-          //baseWing3.rotation.x+=Math.PI/2;
-          //baseWing4.rotation.x+=Math.PI/2;
-
           baseWing3.rotation.z+=Math.PI/2;
           baseWing4.rotation.z+=Math.PI/2;
 
@@ -338,9 +358,16 @@
 
 
 
-          scene.add(Drone);
+        
 
-          Drone.scale.set(0.30,0.30,0.30);
+          Drone.scale.set(0.16,0.16,0.16);
+
+          Drone.position.y=-8;
+          Drone.position.z= 6;
+
+
+         
+        
 
 
 
@@ -363,12 +390,13 @@
 
              GyroGroup.scale.set(0.75,0.75,0.75);
 
-             GyroGroup.position.y= -0.2;
+          
              GyroGroup.position.x= -9.2;
 
              scene.add(GyroGroup);
 
              GyroGroup.position.x = -28;
+             GyroGroup.position.y = 3;
 
 
         //Carrousel
@@ -488,7 +516,7 @@
               return GeneralGroup;
             }
 
-            function makeCyl(){
+            function makeCyl(){ //Function to make horse cylinders
                 var cylGeoHorse = new THREE.CylinderGeometry(0.30,0.30,10);
                 var cylMesh = new THREE.Mesh(cylGeoHorse,MarmolCylMaterial);
                 cylMesh.position.y+=2.5;
@@ -540,7 +568,7 @@
 
             }
         
-            //Carousel contruction
+            //Carrousel body contruction
 
           
 
@@ -557,16 +585,16 @@
             var RoofCarrousel = new THREE.Mesh(RoofCarrouselGeometry, circusTop);
             RoofCarrousel.position.y+=10;
 
-          CarrouselGroup.add(floorCarrousel);
-          CarrouselGroup.add(centerCyl);
-          CarrouselGroup.add(RoofCarrousel);
-          CarrouselGroup.add(HorseCylUnion);
+            CarrouselGroup.add(floorCarrousel);
+            CarrouselGroup.add(centerCyl);
+            CarrouselGroup.add(RoofCarrousel);
+            CarrouselGroup.add(HorseCylUnion);
 
-       
-      
-          CarrouselGroup.position.x+=25;
-          CarrouselGroup.position.y-=6.5;
-          CarrouselGroup.scale.set(0.40,0.40,0.40);
+         
+        
+            CarrouselGroup.position.x+=25;
+            CarrouselGroup.position.y-=6.5;
+            CarrouselGroup.scale.set(0.40,0.40,0.40);
             
             scene.add(CarrouselGroup);
 
@@ -581,7 +609,7 @@
             var arriba = false;
             var abajo= 0;
 
-
+            //Wheel implementation
              var basket1 = new THREE.Mesh();
             function loadBasket(){
               var onProgress = function ( xhr ) {
@@ -628,8 +656,8 @@
               loadBasket();
             }
 
-            alert(baskets.length);
-            alert(baskets[0]);
+            alert("Welcome to our amusement park!");
+            alert("press enter to continue");
             for(var i = 0; i < numBaskets; i++){
               var x = Math.cos(toRadians(angleAct)) * radius;
               var y = Math.sin(toRadians(angleAct)) * radius;
@@ -700,7 +728,7 @@
                     }, onProgress, onError );
                 } );
             }
-            alert(baskets.length);
+            
             loadCarBody();
             var carBodyGroup = new THREE.Object3D();
             carBodyGroup.add(carBody);
@@ -972,10 +1000,16 @@
             carGroup.add(carLeftDoorGroup);
             carGroup.add(carRightDoorGroup);
             carGroup.add(carWheelGroup);
+            carGroup.add(Drone);
+
+            Drone.position.z= 0;
+            Drone.position.y =0;
+
 
 
 
             scene.add(carGroup);
+
 
 
             carGroup.position.y = -8;
@@ -983,10 +1017,11 @@
 
 
             var render = function () {
+              renderer.render(scene, camera);
+              requestAnimationFrame(render);
 
-                  CarrouselGroup.rotation.y-=(0.35*Math.PI/180);
-
-                  armGroup.rotation.z += toRadians(0.5);
+                CarrouselGroup.rotation.y-=(0.35*Math.PI/180);
+                armGroup.rotation.z += toRadians(0.5);
                 sphereGroup.rotation.z += toRadians(0.5);
                 for(var i = 0; i < numBaskets; i++){
                   baskets[i].rotation.z-= toRadians(0.5);
@@ -1001,7 +1036,7 @@
 
 
 
-
+                  //horse movement
                   for(var i = 0; i < (15/2); i++){
 
                     if(abajo == 1){
@@ -1027,17 +1062,26 @@
 
                     
                   
-                
-
-
-
                   }
 
+
+                  //Drone deployment
+                  if(deployDrone == 1){
+                      if(Drone.position.y<=6){
+                      Drone.position.y += 0.25;  
+                    }
+
+                  }
+                    
+                      else{
+                        if(deployDrone == 0){
+                          if(Drone.position.y >0 ){
+                            Drone.position.y -= 0.25;
+                          }
+                        }
+                    }
           
-
-              renderer.render(scene, camera);
-              requestAnimationFrame(render);
-
+              //Gyro tower movement
               if (sube) {
                     torus.position.y += 0.25;
                     torusPos+=0.25;
